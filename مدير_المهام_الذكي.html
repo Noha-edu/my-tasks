@@ -287,7 +287,6 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
   <button class="tab" onclick="swTab('reminders',this)">التذكيرات</button>
   <button class="tab" onclick="swTab('links',this)">الروابط</button>
   <button class="tab" onclick="swTab('waiting',this)">⏸ الانتظار</button>
-  <button class="tab" onclick="swTab('chat',this)">💬 محادثة</button>
 </div>
 <div class="body">
 <div class="side">
@@ -320,14 +319,40 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
     </div>
   </div>
 
-  <!-- Organize My Day Button -->
-  <div style="margin-bottom:12px;">
-    <button onclick="openOrg()" style="width:100%;background:linear-gradient(135deg,var(--p),var(--pm));color:#fff;border:none;border-radius:var(--r);padding:11px 16px;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500;">
-      🗓️ نظّمي يومي بالذكاء الاصطناعي
-    </button>
-  </div>
+  
 
-  <div class="ap" id="ap">
+<!-- Organize My Day - inline section -->
+<div style="background:var(--s);border:1px solid var(--b);border-radius:var(--r);padding:14px;margin-bottom:12px;">
+  <div style="font-size:14px;font-weight:600;color:var(--p);margin-bottom:10px;">🗓️ نظّمي يومي</div>
+
+  <div style="margin-bottom:12px;">
+    <div style="font-size:13px;color:var(--t2);margin-bottom:8px;">اكتبي مهامك لليوم — كل مهمة في سطر أو افصلي بفاصلة:</div>
+    <textarea id="org-input" style="width:100%;border:1.5px solid var(--b);border-radius:var(--rs);padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;outline:none;color:var(--t);background:var(--bg);" placeholder="مثال:&#10;إعداد محاضرة&#10;مراجعة أبحاث الطلاب&#10;اجتماع مع القسم&#10;ردّ على الإيميلات&#10;إعداد امتحان"></textarea>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px;">📌 يوميك من 5 صباحاً إلى 4 صباحاً اليوم التالي. اكتبي وقت كل مهمة لو حددتيه ("5-7 م")، أو مدتها فقط ("ساعتين") وستُجدوَل تباعاً.</div>
+  </div>
+  <div id="org-result" style="display:none;">
+    <div style="border-top:1px solid var(--b);padding-top:12px;margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:600;color:var(--t);margin-bottom:4px;">📊 تقدير الوقت والجدول المقترح:</div>
+      <div id="org-summary" style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.7;"></div>
+      <div id="org-schedule" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+    <div style="background:var(--pl);border:1px solid var(--pm);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:600;color:var(--pd);margin-bottom:4px;">💡 نصيحة الذكاء الاصطناعي:</div>
+      <div id="org-tip" style="font-size:12px;color:var(--pd);line-height:1.7;"></div>
+    </div>
+  </div>
+  <div id="org-loading" style="display:none;text-align:center;padding:20px;color:var(--t2);font-size:13px;">
+    <div class="sp" style="font-size:24px;display:inline-block;margin-bottom:8px;">⏳</div>
+    <div>جارٍ التحليل وتوزيع المهام...</div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button id="org-analyze-btn" onclick="doOrg()" style="flex:1;background:linear-gradient(135deg,var(--p),var(--pm));color:#fff;border:none;border-radius:var(--r);padding:11px 16px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500;">✨ حلّل ووزّع</button>
+    <button id="org-add-btn" onclick="addOrgTasks()" style="flex:1;display:none;background:var(--grn);color:#fff;border:none;border-radius:var(--r);padding:11px 16px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500;">✅ أضف للجدول</button>
+  </div>
+</div>
+
+
+<div class="ap" id="ap">
     <div class="ah">✨ <span id="apt">جارٍ التحليل...</span></div>
     <div class="abt" id="abt"></div>
     <div class="ats" id="ats"></div>
@@ -399,18 +424,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
   </div>
   <div id="wl"></div>
 </div>
-<!-- Chat -->
-<div id="p-chat" class="vp" style="display:flex;flex-direction:column;height:100%;">
-  <div style="font-size:13px;color:var(--t2);margin-bottom:10px;line-height:1.7;background:var(--pl);border:1px solid var(--pm);border-radius:var(--r);padding:10px 13px;">
-    💬 احكيلي عن يومك بشكل طبيعي — هفهم اللي عملتيه (يُسجَّل كمنجز) واللي عايزة تعمليه (يُوزَّع على وقتك المتبقي).
-  </div>
-  <div id="chat-msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:6px 0;min-height:200px;"></div>
-  <div style="display:flex;gap:7px;margin-top:10px;align-items:flex-end;">
-    <textarea id="chat-input" rows="3" placeholder="مثال: الساعة دلوقتي 10م، النهارده الجمعة، صحيت وصليت الظهر الساعة 12، من 3م لـ 6م عملت الغدا وتوضيب التلاجة. دلوقتي عايزة أصحح اختبارات (3 ساعات) وأصلي العشا..." style="flex:1;border:1.5px solid var(--b);border-radius:var(--r);padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical;outline:none;color:var(--t);background:var(--s);min-height:70px;"></textarea>
-    <button id="chat-mic" onclick="chatMic()" class="ib" title="صوت" style="flex-shrink:0;">🎤</button>
-    <button id="chat-send" onclick="sendChat()" class="anb" style="flex-shrink:0;">➤</button>
-  </div>
-</div>
+
 </div><!-- con -->
 </div><!-- body -->
 </div><!-- app -->
@@ -455,45 +469,6 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 
 <div class="toast" id="tst"></div>
 
-<!-- Organize Modal -->
-<div class="mbg" id="org-modal">
-<div class="modal" style="max-width:560px;">
-  <div class="mtit">🗓️ نظّمي يومي <button class="mcl" onclick="closeOrg()">✕</button></div>
-  <div style="margin-bottom:12px;">
-    <div style="font-size:13px;color:var(--t2);margin-bottom:8px;">اكتبي مهامك لليوم — كل مهمة في سطر أو افصلي بفاصلة:</div>
-    <textarea id="org-input" style="width:100%;border:1.5px solid var(--b);border-radius:var(--rs);padding:9px 11px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;outline:none;color:var(--t);background:var(--bg);" placeholder="مثال:&#10;إعداد محاضرة&#10;مراجعة أبحاث الطلاب&#10;اجتماع مع القسم&#10;ردّ على الإيميلات&#10;إعداد امتحان"></textarea>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">
-      <span style="font-size:12px;color:var(--t2);">بداية يومي:</span>
-      <input type="time" id="org-start" value="08:00" style="border:1px solid var(--b);border-radius:var(--rs);padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--t);outline:none;">
-      <span style="font-size:12px;color:var(--t2);">نهاية يومي:</span>
-      <input type="time" id="org-end" value="18:00" style="border:1px solid var(--b);border-radius:var(--rs);padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--t);outline:none;">
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;">
-        <input type="checkbox" id="org-break" checked> استراحات بين المهام
-      </label>
-    </div>
-  </div>
-  <div id="org-result" style="display:none;">
-    <div style="border-top:1px solid var(--b);padding-top:12px;margin-bottom:8px;">
-      <div style="font-size:13px;font-weight:600;color:var(--t);margin-bottom:4px;">📊 تقدير الوقت والجدول المقترح:</div>
-      <div id="org-summary" style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.7;"></div>
-      <div id="org-schedule" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-    <div style="background:var(--pl);border:1px solid var(--pm);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:600;color:var(--pd);margin-bottom:4px;">💡 نصيحة الذكاء الاصطناعي:</div>
-      <div id="org-tip" style="font-size:12px;color:var(--pd);line-height:1.7;"></div>
-    </div>
-  </div>
-  <div id="org-loading" style="display:none;text-align:center;padding:20px;color:var(--t2);font-size:13px;">
-    <div class="sp" style="font-size:24px;display:inline-block;margin-bottom:8px;">⏳</div>
-    <div>جارٍ التحليل وتوزيع المهام...</div>
-  </div>
-  <div class="macts">
-    <button class="mb mbp" id="org-analyze-btn" onclick="doOrg()">✨ حلّل ووزّع</button>
-    <button class="mb mbp" id="org-add-btn" onclick="addOrgTasks()" style="display:none;background:var(--grn);">✅ أضف للجدول</button>
-    <button class="mb mbs" onclick="closeOrg()">إلغاء</button>
-  </div>
-</div>
-</div>
 <script>
 const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const DN=['أحد','اثن','ثلا','أرب','خمس','جمع','سبت'];
@@ -991,135 +966,190 @@ function toast(msg){var el=document.getElementById('tst');el.textContent=msg;el.
 // ORGANIZE MY DAY
 var orgTasks = [];
 
-function openOrg(){
-  document.getElementById('org-modal').classList.add('on');
-  document.getElementById('org-result').style.display='none';
-  document.getElementById('org-loading').style.display='none';
-  document.getElementById('org-add-btn').style.display='none';
-  document.getElementById('org-analyze-btn').style.display='';
-  // Pre-fill with today's pending tasks
-  var pending = tasks.filter(function(t){ return tsk(t)===tdk() && !t.done && !t.time; });
-  if(pending.length > 0){
-    document.getElementById('org-input').value = pending.map(function(t){ return t.title; }).join('\n');
-  }
-}
 
-function closeOrg(){
-  document.getElementById('org-modal').classList.remove('on');
-  orgTasks = [];
-}
-
-async function doOrg(){
+function doOrg(){
   var input = document.getElementById('org-input').value.trim();
   if(!input){ toast('اكتبي مهامك أولاً'); return; }
   
-  var startTime = document.getElementById('org-start').value || '08:00';
-  var endTime = document.getElementById('org-end').value || '18:00';
-  var withBreaks = document.getElementById('org-break').checked;
-  
-  var startH = parseInt(startTime.split(':')[0]);
-  var endH = parseInt(endTime.split(':')[0]);
-  var totalMins = (endH - startH) * 60;
-  
   document.getElementById('org-loading').style.display='block';
   document.getElementById('org-result').style.display='none';
-  document.getElementById('org-analyze-btn').disabled = true;
   
-    var systemPrompt = "أنت مساعد ذكي متخصص في إدارة الوقت للأكاديميين." + " مهمتك تقدير الوقت اللازم لكل مهمة وتوزيعها على اليوم." + " الوقت المتاح من " + startTime + " إلى " + endTime + "." + (withBreaks ? " أضف استراحة 15 دقيقة كل ساعتين." : "") + ' أجب بـ JSON فقط: {"summary":"ملخص","tip":"نصيحة","tasks":[{"title":"","duration_mins":60,"start_time":"09:00","end_time":"10:00","category":"work","priority":"high","reason":"سبب"}]}';
+  var lines = input.split(/\n/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length>1; }).filter(function(s){ return !/^ملاحظة/.test(s); });
   
-  var userMsg = "وزّعي هذه المهام على يومي:\n" + input + "\n\nالوقت المتاح: " + startTime + " - " + endTime + "\n\nقدّري الوقت اللازم لكل مهمة بناءً على طبيعتها الأكاديمية.";
+  // Day spans 5am to 4am next day (23 hours), represented as 5..28
+  var DAY_START=5, DAY_END=28;
   
-  try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{role:'user', content: userMsg}]
-      })
-    });
-    
-    if(!res.ok) throw new Error('API error');
-    var data = await res.json();
-    var raw = data.content.map(function(c){ return c.text||''; }).join('');
-    var parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    
-    document.getElementById('org-summary').textContent = parsed.summary || '';
-    document.getElementById('org-tip').textContent = parsed.tip || '';
-    
-    orgTasks = parsed.tasks || [];
-    
-    var schedHTML = orgTasks.map(function(t, i){
-      var catColor = {work:'var(--p)',personal:'var(--tel)',meeting:'var(--blu)',health:'var(--cor)',home:'var(--amb)'}[t.category] || 'var(--p)';
-      var priLabel = {high:'🔴',med:'🟡',low:'🟢'}[t.priority] || '🟡';
-      return '<div style="background:var(--bg);border:1px solid var(--b);border-right:3px solid '+catColor+';border-radius:var(--rs);padding:8px 11px;display:flex;align-items:center;gap:8px;">'+
-        '<div style="flex-shrink:0;text-align:center;min-width:70px;">'+
-          '<div style="font-size:12px;font-weight:600;color:'+catColor+';">'+t.start_time+' - '+t.end_time+'</div>'+
-          '<div style="font-size:10px;color:var(--t3);">'+(t.duration_mins >= 60 ? Math.floor(t.duration_mins/60)+'س '+(t.duration_mins%60?t.duration_mins%60+'د':'') : t.duration_mins+'د')+'</div>'+
-        '</div>'+
-        '<div style="flex:1;">'+
-          '<div style="font-size:13px;color:var(--t);">'+priLabel+' '+t.title+'</div>'+
-          '<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+t.reason+'</div>'+
-        '</div>'+
-        '<input type="checkbox" checked id="org-t-'+i+'" style="width:16px;height:16px;cursor:pointer;">'+
-      '</div>';
-    }).join('');
-    
-    document.getElementById('org-schedule').innerHTML = schedHTML;
-    document.getElementById('org-result').style.display='block';
-    document.getElementById('org-add-btn').style.display='';
-    
-  } catch(e) {
-    // Fallback: local estimation
-    var lines = input.split(/\n|،|,/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length>1; });
-    var estimates = {
-      'محاضرة': 90, 'درس': 90, 'تدريس': 90,
-      'اجتماع': 60, 'مقابلة': 60, 'لقاء': 60,
-      'بحث': 120, 'مراجعة': 90, 'قراءة': 60,
-      'تقرير': 90, 'كتابة': 90, 'إعداد': 60,
-      'إيميل': 30, 'بريد': 30, 'رد': 30,
-      'امتحان': 120, 'اختبار': 120,
-      'إدارية': 45, 'إجراءات': 45,
-    };
-    
-    var curH = startH, curM = 0;
-    orgTasks = lines.map(function(title){
-      var dur = 60;
-      Object.keys(estimates).forEach(function(k){ if(title.includes(k)) dur = estimates[k]; });
-      var sh = curH<10?'0'+curH:curH, sm = curM<10?'0'+curM:curM;
-      var endMin = curM + dur;
-      var eh = curH + Math.floor(endMin/60), em = endMin%60;
-      var es = (eh<10?'0'+eh:eh)+':'+(em<10?'0'+em:em);
-      var st = sh+':'+sm;
-      if(withBreaks){ eh += Math.floor((em+15)/60); em = (em+15)%60; }
-      curH = eh; curM = em;
-      return {title:title, duration_mins:dur, start_time:st, end_time:es, category:'work', priority:'med', reason:'تقدير محلي'};
-    });
-    
-    document.getElementById('org-summary').textContent = 'تقدير محلي — ' + lines.length + ' مهام، إجمالي ' + orgTasks.reduce(function(s,t){ return s+t.duration_mins; },0) + ' دقيقة';
-    document.getElementById('org-tip').textContent = 'ابدئي بأصعب مهمة في بداية اليوم عندما تكون طاقتك في أعلى مستوياتها.';
-    
-    var schedHTML = orgTasks.map(function(t,i){
-      return '<div style="background:var(--bg);border:1px solid var(--b);border-right:3px solid var(--p);border-radius:var(--rs);padding:8px 11px;display:flex;align-items:center;gap:8px;">'+
-        '<div style="flex-shrink:0;min-width:70px;text-align:center;">'+
-          '<div style="font-size:12px;font-weight:600;color:var(--p);">'+t.start_time+' - '+t.end_time+'</div>'+
-          '<div style="font-size:10px;color:var(--t3);">'+(t.duration_mins>=60?Math.floor(t.duration_mins/60)+'س '+(t.duration_mins%60?t.duration_mins%60+'د':''):t.duration_mins+'د')+'</div>'+
-        '</div>'+
-        '<div style="flex:1;font-size:13px;color:var(--t);">'+t.title+'</div>'+
-        '<input type="checkbox" checked id="org-t-'+i+'" style="width:16px;height:16px;cursor:pointer;">'+
-      '</div>';
-    }).join('');
-    
-    document.getElementById('org-schedule').innerHTML = schedHTML;
-    document.getElementById('org-result').style.display='block';
-    document.getElementById('org-add-btn').style.display='';
-    toast('تم التقدير محلياً');
+  var durEstimates = {
+    'محاضرة': 90, 'درس': 90, 'تدريس': 90, 'شرح': 60,
+    'اجتماع': 60, 'مقابلة': 60, 'لقاء': 60,
+    'بحث': 120, 'مراجعة': 90, 'قراءة': 60, 'مذاكرة':90,
+    'تقرير': 90, 'كتابة': 90, 'إعداد': 60, 'تحضير':60,
+    'إيميل': 30, 'بريد': 30, 'رد': 30, 'رسائل':30, 'واتس':30,'واتساب':30,
+    'امتحان': 120, 'اختبار': 120, 'تصحيح':120,
+    'إدارية': 45, 'إجراءات': 45, 'درجات':60,
+    'صلاة':20,'صلاه':20,'عشاء':20,'ورد':30,
+    'غدا':90,'غداء':90,'طبخ':90,
+  };
+  
+  // Convert hour (1-12) + suffix to 24h, with optional dayShift (for after-midnight)
+  function to24(h,suf){
+    h=parseInt(h);
+    if(suf==='م'&&h<12)h+=12;
+    if(suf==='ص'&&h===12)h=0;
+    return h;
+  }
+  // Map a 24h hour to the "extended day" scale (5..28) for ordering
+  function toExt(h){
+    return h<DAY_START ? h+24 : h;
   }
   
+  // PASS 1: parse each line - extract explicit range, explicit duration, or default
+  var parsed = lines.map(function(line){
+    var cleanTitle=line;
+    var explicitStart=-1, explicitEnd=-1, durMins=null;
+    
+    // Range: "5-7 م" or "9-9.30 م" or "9.30-12 م"  (single trailing ص/م applies to both)
+    // Range with optional trailing ص/م: "5-6 م" or "9- 12" or "9-12 ص"
+    var rangeM=line.match(/(\d{1,2}(?:[.:]\d{2})?)\s*-\s*(\d{1,2}(?:[.:]\d{2})?)\s*(ص|م)?/);
+    if(rangeM){
+      var p1=rangeM[1].split(/[.:]/), p2=rangeM[2].split(/[.:]/);
+      var h1=parseInt(p1[0]), m1=p1[1]?parseInt(p1[1]):0;
+      var h2=parseInt(p2[0]), m2=p2[1]?parseInt(p2[1]):0;
+      var hasSuf=!!rangeM[3];
+      var suf=rangeM[3]||'م'; // default to evening (PM) when unspecified - matches typical daily planning
+      var h1_24=to24(h1,suf);
+      var h2_24=to24(h2,suf);
+      var startExt=toExt(h1_24)+m1/60;
+      var endExt=toExt(h2_24)+m2/60;
+      if(endExt<=startExt){
+        if(hasSuf){
+          // try flipping end suffix to opposite
+          var altSuf=(suf==='م')?'ص':'م';
+          var h2_alt=to24(h2,altSuf);
+          var endExtAlt=toExt(h2_alt)+m2/60;
+          if(endExtAlt>startExt){endExt=endExtAlt;h2_24=h2_alt;}
+          else { endExt=startExt+1; }
+        } else {
+          // no suffix at all and end<=start: end is on the "ص" side after midnight (e.g. 12-1.30 -> 12pm to 1:30am)
+          var h2_am=to24(h2,'ص');
+          var endExtAm=toExt(h2_am)+m2/60;
+          if(endExtAm>startExt){endExt=endExtAm;}
+          else { endExt=startExt+1; }
+        }
+      }
+      explicitStart=startExt;
+      explicitEnd=endExt;
+      cleanTitle=line.replace(rangeM[0],'').trim();
+    } else {
+      // Single explicit time: "الساعة 5 م" or "5 م"
+      var singleM=line.match(/(?:الساعة\s*)?(\d{1,2})\s*(ص|م)/);
+      if(singleM){
+        var h=to24(singleM[1],singleM[2]);
+        explicitStart=toExt(h);
+        cleanTitle=line.replace(singleM[0],'').trim();
+      }
+    }
+    
+    // Duration phrase: "ساعتين", "3 ساعات", "نص ساعة", "ساعة ونصف", in (...) or anywhere
+    var durParenM=line.match(/\(([^)]*)\)/);
+    var durMatchStr=null, durFullMatch=null;
+    var dmParen=durParenM?durParenM[1].match(/(ساعتين|نص ساعة|ساعة ونصف|\d+\s*ساع(?:ة|ات|ه)|\d+\s*دقيق(?:ة|ائق|ه))/):null;
+    if(dmParen){durMatchStr=dmParen[1];durFullMatch=durParenM[0];}
+    else{
+      var dmFree=line.match(/(ساعتين|نص ساعة|ساعة ونصف|\d+\s*ساع(?:ة|ات|ه)|\d+\s*دقيق(?:ة|ائق|ه))/);
+      if(dmFree){durMatchStr=dmFree[1];durFullMatch=dmFree[0];}
+    }
+    if(durMatchStr){
+      var d=durMatchStr;
+      if(d==='ساعتين')durMins=120;
+      else if(d==='نص ساعة')durMins=30;
+      else if(d==='ساعة ونصف')durMins=90;
+      else{var nm=d.match(/(\d+)/);var n=nm?parseInt(nm[1]):1;durMins=d.indexOf('دقيق')!==-1?n:n*60;}
+      cleanTitle=cleanTitle.replace(durFullMatch,'').trim();
+    }
+    
+    cleanTitle=cleanTitle.replace(/^[-–\s]+|[-–\s]+$/g,'').trim();
+    if(!cleanTitle)cleanTitle=line.trim();
+    
+    if(durMins===null && explicitStart>=0 && explicitEnd>=0){
+      durMins=Math.round((explicitEnd-explicitStart)*60);
+    }
+    if(durMins===null) {
+      durMins=60;
+      Object.keys(durEstimates).forEach(function(k){ if(cleanTitle.indexOf(k)!==-1) durMins = durEstimates[k]; });
+    }
+    
+    var cat='work';
+    if(cleanTitle.indexOf('صل')!==-1||cleanTitle.indexOf('عشا')!==-1||cleanTitle.indexOf('ورد')!==-1)cat='personal';
+    else if(cleanTitle.indexOf('غدا')!==-1||cleanTitle.indexOf('مطبخ')!==-1||cleanTitle.indexOf('طبخ')!==-1||cleanTitle.indexOf('الأوضة')!==-1||cleanTitle.indexOf('تنظيم')!==-1)cat='home';
+    else if(cleanTitle.indexOf('اجتماع')!==-1||cleanTitle.indexOf('زووم')!==-1)cat='meeting';
+    
+    return {title:cleanTitle, explicitStart:explicitStart, explicitEnd:explicitEnd, durMins:durMins, cat:cat};
+  });
+  
+  // PASS 2: schedule - explicit times go where specified; durations fill gaps sequentially
+  var cursor=DAY_START; // extended-day hour, fractional
+  var result=[];
+  parsed.forEach(function(p){
+    var s,e;
+    if(p.explicitStart>=0){
+      s=p.explicitStart;
+      e=(p.explicitEnd>=0)?p.explicitEnd:s+p.durMins/60;
+      cursor=Math.max(cursor,e);
+    } else {
+      s=cursor;
+      e=s+p.durMins/60;
+      cursor=e;
+    }
+    result.push({title:p.title,start:s,end:e,durMins:Math.round((e-s)*60),cat:p.cat});
+  });
+  
+  // Convert extended hour back to real 24h + display
+  function extToReal(ext){
+    var h=Math.floor(ext)%24;
+    var m=Math.round((ext%1)*60);
+    if(m===60){m=0;h=(h+1)%24;}
+    return {h:h,m:m};
+  }
+  function fmtExt(ext){
+    var r=extToReal(ext);
+    var disp=r.h>12?r.h-12:r.h===0?12:r.h;
+    var isAM=(r.h<12);
+    return disp+(r.m?':'+(r.m<10?'0'+r.m:r.m):':00')+' '+(isAM?'ص':'م');
+  }
+  
+  orgTasks = result.map(function(t){
+    var rs=extToReal(t.start), re_=extToReal(t.end);
+    return {
+      title:t.title,
+      duration_mins:t.durMins,
+      start_time:(rs.h<10?'0'+rs.h:rs.h)+':'+(rs.m<10?'0'+rs.m:rs.m),
+      end_time:(re_.h<10?'0'+re_.h:re_.h)+':'+(re_.m<10?'0'+re_.m:re_.m),
+      category:t.cat, priority:'med', reason:''
+    };
+  });
+  
+  var totalMins=result.reduce(function(s,t){return s+t.durMins;},0);
+  var lastExt=result.length?result[result.length-1].end:DAY_START;
+  document.getElementById('org-summary').textContent = result.length+' مهام، إجمالي '+Math.floor(totalMins/60)+' ساعة و'+(totalMins%60)+' دقيقة. ينتهي تقريباً الساعة '+fmtExt(lastExt)+'.';
+  document.getElementById('org-tip').textContent = 'تأكدي إن جدولك متّسق مع وقت الصلوات وفترات الراحة بين المهام الطويلة.';
+  
+  var schedHTML = orgTasks.map(function(t, i){
+    var catColor = {work:'var(--p)',personal:'var(--tel)',meeting:'var(--blu)',health:'var(--cor)',home:'var(--amb)'}[t.category] || 'var(--p)';
+    return '<div style="background:var(--bg);border:1px solid var(--b);border-right:3px solid '+catColor+';border-radius:var(--rs);padding:8px 11px;display:flex;align-items:center;gap:8px;">'+
+      '<div style="flex-shrink:0;text-align:center;min-width:75px;">'+
+        '<div style="font-size:12px;font-weight:600;color:'+catColor+';">'+ft(t.start_time)+' - '+ft(t.end_time)+'</div>'+
+        '<div style="font-size:10px;color:var(--t3);">'+(t.duration_mins >= 60 ? Math.floor(t.duration_mins/60)+'س '+(t.duration_mins%60?t.duration_mins%60+'د':'') : t.duration_mins+'د')+'</div>'+
+      '</div>'+
+      '<div style="flex:1;font-size:13px;color:var(--t);">'+t.title+'</div>'+
+      '<input type="checkbox" checked id="org-t-'+i+'" style="width:16px;height:16px;cursor:pointer;">'+
+    '</div>';
+  }).join('');
+  
+  document.getElementById('org-schedule').innerHTML = schedHTML;
+  document.getElementById('org-result').style.display='block';
+  document.getElementById('org-add-btn').style.display='';
   document.getElementById('org-loading').style.display='none';
-  document.getElementById('org-analyze-btn').disabled = false;
 }
 
 function addOrgTasks(){
@@ -1146,149 +1176,12 @@ function addOrgTasks(){
     if(window.fbSave) window.fbSave('tasks', task.id, task);
     added++;
   });
-  closeOrg();
+  document.getElementById('org-input').value='';
+  document.getElementById('org-result').style.display='none';
+  document.getElementById('org-add-btn').style.display='none';
   renderAll();
   toast('✅ تمت إضافة '+added+' مهام للجدول!');
 }
-
-// CHAT
-var chatHistory=[];
-var chatRec=null, chatIsRec=false;
-
-function addChatMsg(role,text,isLoading){
-  var msgs=document.getElementById('chat-msgs');
-  var div=document.createElement('div');
-  div.style.cssText='max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;'+
-    (role==='user'?'background:var(--p);color:#fff;align-self:flex-end;border-bottom-left-radius:4px;':'background:var(--pl);color:var(--pd);align-self:flex-start;border-bottom-right-radius:4px;');
-  if(isLoading) div.id='chat-loading';
-  div.textContent=text;
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-  return div;
-}
-
-function chatMic(){
-  if(chatIsRec){
-    chatIsRec=false;
-    try{if(chatRec){chatRec.onend=null;chatRec.stop();}}catch(e){}
-    document.getElementById('chat-mic').classList.remove('rec');
-    return;
-  }
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('استخدمي Chrome للتسجيل الصوتي');return;}
-  chatRec=new SR();chatRec.lang='ar-SA';chatRec.continuous=true;chatRec.interimResults=true;
-  var fin=document.getElementById('chat-input').value;
-  if(fin)fin+=' ';
-  chatRec.onresult=function(e){
-    var interim='';
-    for(var i=e.resultIndex;i<e.results.length;i++){
-      var tx=e.results[i][0].transcript;
-      if(e.results[i].isFinal){fin+=tx+' ';document.getElementById('chat-input').value=fin.trim();}
-      else interim=tx;
-    }
-    document.getElementById('chat-input').value=(fin+interim).trim();
-  };
-  chatRec.onerror=function(){chatIsRec=false;document.getElementById('chat-mic').classList.remove('rec');};
-  chatRec.onend=function(){if(chatIsRec){try{chatRec.start();}catch(e){}}};
-  chatIsRec=true;
-  document.getElementById('chat-mic').classList.add('rec');
-  try{chatRec.start();}catch(e){chatIsRec=false;}
-}
-
-async function sendChat(){
-  var input=document.getElementById('chat-input').value.trim();
-  if(!input){toast('اكتبي رسالة');return;}
-  if(chatIsRec)chatMic();
-  
-  addChatMsg('user',input);
-  document.getElementById('chat-input').value='';
-  document.getElementById('chat-send').disabled=true;
-  var loadEl=addChatMsg('assistant','جارٍ التفكير...',true);
-  
-  var now=new Date();
-  var curH=now.getHours(), curM=now.getMinutes();
-  var curTimeStr=(curH%12===0?12:curH%12)+':'+(curM<10?'0'+curM:curM)+' '+(curH>=12?'م':'ص');
-  var dayNames=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-  var todayName=dayNames[now.getDay()];
-  
-  var existingTasks=tasks.filter(function(t){return tsk(t)===tdk();}).map(function(t){
-    return (t.done?'[منجز] ':'[معلق] ')+t.title+(t.time?' - '+t.time:'');
-  }).join('\n');
-  
-  var sysPrompt='أنتِ مساعدة شخصية ذكية لدكتورة جامعية، تتحدثين العربية بطلاقة وبأسلوب طبيعي ودود ومحترم.'+
-    ' الوقت الحالي: '+curTimeStr+'. اليوم: '+todayName+'.'+
-    ' مهامها الحالية اليوم:\n'+(existingTasks||'(لا توجد مهام مسجلة بعد)')+
-    '\n\nمهمتك: اقرئي رسالة المستخدمة بعناية وميّزي بين نوعين:'+
-    ' 1) أحداث/مهام ماضية حصلت بالفعل (مثل: صحيت، صليت، عملت الغدا) - هذه تُسجَّل كمهام منجزة (done:true) بأوقاتها الحقيقية إن وُجدت.'+
-    ' 2) مهام مستقبلية مطلوبة الآن - وزّعيها بذكاء على الوقت المتبقي من اليوم، بالترتيب المنطقي (الصلاة في وقتها، المهام الطويلة أولاً أو حسب الأولوية المذكورة)، مع إعطاء كل مهمة المدة المذكورة أو تقدير معقول إن لم تُذكر.'+
-    ' ردّي بصيغة JSON فقط بدون أي نص خارج JSON، بهذا الشكل:'+
-    '{"reply":"رد ودود طبيعي يلخص ما فهمتيه ويعطي نصيحة أو تشجيعاً","tasks":[{"title":"نص المهمة","time":"H:MM","time2":"H:MM أو فارغ","done":true/false,"cat":"work/personal/meeting/health/home","pri":"high/med/low"}]}'+
-    ' استخدمي صيغة 24 ساعة لـ H:MM (مثل 22:00 لـ10م، 15:00 لـ3م). كل وقت يجب أن يكون رقمياً صحيحاً.';
-  
-  try{
-    var res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        system:sysPrompt,
-        messages:chatHistory.concat([{role:'user',content:input}])
-      })
-    });
-    if(!res.ok)throw new Error('API error '+res.status);
-    var data=await res.json();
-    var raw=data.content.map(function(c){return c.text||'';}).join('');
-    var parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    
-    loadEl.remove();
-    addChatMsg('assistant',parsed.reply||'تم!');
-    
-    chatHistory.push({role:'user',content:input});
-    chatHistory.push({role:'assistant',content:raw});
-    if(chatHistory.length>10)chatHistory=chatHistory.slice(-10);
-    
-    var added=0,marked=0;
-    (parsed.tasks||[]).forEach(function(pt,i){
-      var th=-1,th2=-1,timeL='',timeL2='';
-      if(pt.time&&pt.time.includes(':')){
-        var hp=pt.time.split(':');th=parseInt(hp[0]);
-        timeL=ft((th<10?'0'+th:th)+':'+(hp[1]||'00'));
-      }
-      if(pt.time2&&pt.time2.includes(':')){
-        var hp2=pt.time2.split(':');th2=parseInt(hp2[0]);
-        timeL2=ft((th2<10?'0'+th2:th2)+':'+(hp2[1]||'00'));
-      }
-      var task={
-        id:Date.now()+i,title:pt.title,time:timeL,th:th,time2:timeL2,th2:th2,
-        date:tdk(),dk:tdk(),cat:pt.cat||'work',pri:pt.pri||'med',
-        rem:(!pt.done&&th>=0)?'قبل 15 دقيقة':'',link:'',notes:'',tip:'',done:!!pt.done
-      };
-      tasks.unshift(task);
-      if(window.fbSave)window.fbSave('tasks',task.id,task);
-      if(pt.done)marked++;else added++;
-    });
-    
-    if(added||marked){
-      renderAll();
-      var summary='';
-      if(marked)summary+='✅ '+marked+' مسجَّل كمنجز';
-      if(added){if(summary)summary+=' · ';summary+='📅 '+added+' مُضاف للجدول';}
-      addChatMsg('assistant',summary);
-    }
-    
-  }catch(e){
-    loadEl.remove();
-    addChatMsg('assistant','معلش، حصل خطأ في الاتصال. جربي تاني، أو لو المشكلة استمرت أخبري نهى بالخطأ: '+e.message);
-  }
-  document.getElementById('chat-send').disabled=false;
-}
-
-document.addEventListener('keydown',function(e){
-  if(e.target&&e.target.id==='chat-input'&&e.key==='Enter'&&!e.shiftKey){
-    e.preventDefault();sendChat();
-  }
-});
 
 // SIDEBAR TOGGLE
 function toggleSide(){
